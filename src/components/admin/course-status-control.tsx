@@ -31,7 +31,7 @@ export function CourseStatusControl({
               key={option.value}
               className={`relative rounded-md px-5 py-2 text-sm font-medium ${
                 selected
-                  ? "bg-foreground text-background"
+                  ? "bg-accent text-accent-foreground"
                   : "text-foreground/70 hover:bg-foreground/5"
               } ${isPending ? "opacity-50" : ""}`}
             >

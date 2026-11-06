@@ -8,7 +8,7 @@ export function SignOutButton() {
   return (
     <>
       {errorMessage && (
-        <span role="alert" className="text-red-600 dark:text-red-400">
+        <span role="alert" className="text-danger">
           {errorMessage}
         </span>
       )}

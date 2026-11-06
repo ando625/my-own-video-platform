@@ -52,7 +52,7 @@ export function CoursePlayer({
           onClick={() => changeCompleted(!completed)}
           className={`rounded-md border px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
             completed
-              ? "border-foreground bg-foreground text-background"
+              ? "border-accent bg-accent text-accent-foreground"
               : "border-foreground/20 hover:bg-foreground/5"
           }`}
         >
@@ -62,7 +62,7 @@ export function CoursePlayer({
           {completed ? "視聴済み" : "未視聴"}
         </span>
         {errorMessage && (
-          <p role="alert" className="text-sm text-red-700 dark:text-red-400">
+          <p role="alert" className="text-sm text-danger">
             {errorMessage}
           </p>
         )}

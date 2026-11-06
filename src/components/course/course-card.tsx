@@ -19,7 +19,7 @@ export function CourseCard({ href, ariaLabel, course, footer }: CourseCardProps)
   return (
     <li
       aria-label={ariaLabel}
-      className="overflow-hidden rounded-lg border border-foreground/10 transition hover:border-foreground/30 hover:shadow-md"
+      className="overflow-hidden rounded-lg border border-foreground/10 bg-surface shadow-[var(--card-shadow)] transition hover:-translate-y-0.5 hover:border-foreground/30"
     >
       <Link href={href} className="block">
         {/* 画像の場所は講座ごとに違い、外部のYouTubeの画像も使うので、そのまま表示する。 */}

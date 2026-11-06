@@ -26,11 +26,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="flex min-h-12 items-center justify-end gap-4 border-b border-foreground/10 px-6 py-2 text-sm">
-          <Suspense fallback={null}>
-            <AuthStatus />
-          </Suspense>
-        </header>
+        <Suspense fallback={null}>
+          <AuthStatus />
+        </Suspense>
         {children}
       </body>
     </html>

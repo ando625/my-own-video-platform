@@ -2,13 +2,13 @@ const GENERIC_ERROR = "処理に失敗しました。もう一度お試しくだ
 
 type ApiErrorBody = { error?: { message?: string } };
 
-/** ブラウザから管理用APIを呼ぶ。失敗時は表示できるメッセージのエラーを投げる。 */
-export async function adminFetch(
+/** ブラウザからAPIを呼ぶ。失敗時は表示できるメッセージのエラーを投げる。 */
+export async function apiFetch(
   path: string,
-  method: "POST" | "PATCH" | "DELETE",
+  method: "POST" | "PUT" | "PATCH" | "DELETE",
   body?: unknown,
 ): Promise<unknown> {
-  const response = await fetch(`/api/admin${path}`, {
+  const response = await fetch(path, {
     method,
     headers: { "content-type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),

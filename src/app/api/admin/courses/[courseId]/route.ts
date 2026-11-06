@@ -1,10 +1,9 @@
-import { readJsonBody, withAdmin } from "@/lib/admin-route";
+import { readJsonBody, withAdmin } from "@/lib/api-route";
 import {
   deleteCourse,
   getCourse,
   updateCourse,
 } from "@/services/course-service";
-import { getCurriculum } from "@/services/curriculum-service";
 
 type CourseRouteContext = {
   params: Promise<{ courseId: string }>;
@@ -13,11 +12,7 @@ type CourseRouteContext = {
 export const GET = withAdmin(
   async (_request, { params }: CourseRouteContext) => {
     const { courseId } = await params;
-    const course = await getCourse(courseId);
-    return Response.json({
-      course,
-      sections: await getCurriculum(courseId),
-    });
+    return Response.json({ course: await getCourse(courseId) });
   },
 );
 

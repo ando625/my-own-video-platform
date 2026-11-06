@@ -32,6 +32,15 @@ export async function getUserFromHeaders(
   };
 }
 
+/** ログインが必要なページで使う。未ログインはログイン画面へ送る。 */
+export async function requireUser(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+  return user;
+}
+
 /** 管理者のページで使う。未ログインはログイン画面へ送り、管理者以外には存在を隠す。 */
 export async function requireAdmin(): Promise<CurrentUser> {
   const user = await getCurrentUser();

@@ -14,8 +14,3 @@ const client = createClient({
 });
 
 export const db = drizzle(client, { schema });
-
-/** 通常の接続とトランザクションの、どちらでも使える処理のための型。 */
-export type DbClient =
-  | typeof db
-  | Parameters<Parameters<typeof db.transaction>[0]>[0];

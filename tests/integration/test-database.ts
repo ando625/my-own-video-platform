@@ -2,10 +2,8 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "@/db";
 import {
   account,
+  courseProgress,
   courses,
-  lessonProgress,
-  lessons,
-  sections,
   session,
   user,
   verification,
@@ -15,9 +13,7 @@ import {
 export async function resetTestDatabase() {
   await migrate(db, { migrationsFolder: "drizzle" });
 
-  await db.delete(lessonProgress);
-  await db.delete(lessons);
-  await db.delete(sections);
+  await db.delete(courseProgress);
   await db.delete(courses);
   await db.delete(session);
   await db.delete(account);

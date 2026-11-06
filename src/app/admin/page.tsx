@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CreateCourseForm } from "@/components/admin/create-course-form";
+import { CourseForm } from "@/components/admin/course-form";
 import { requireAdmin } from "@/lib/session";
 import { listCourses } from "@/services/course-service";
 
@@ -27,11 +27,11 @@ async function AdminContent() {
   return (
     <>
       <h1 className="text-2xl font-semibold">管理画面</h1>
-      <CreateCourseForm />
+      <CourseForm />
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">コース一覧</h2>
+        <h2 className="text-lg font-semibold">講座一覧</h2>
         {courses.length === 0 ? (
-          <p className="text-sm text-foreground/60">コースはまだありません。</p>
+          <p className="text-sm text-foreground/60">講座はまだありません。</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {courses.map((course) => (

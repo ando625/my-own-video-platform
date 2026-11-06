@@ -18,6 +18,29 @@ export const E2E_USERS = {
   },
 } as const;
 
+export const E2E_VIDEO_ID = "dQw4w9WgXcQ";
+
+export const E2E_COURSES = {
+  first: {
+    id: "e2e-first-course",
+    title: "E2E 公開講座1",
+    description: "E2E 公開講座1の説明",
+    status: "published",
+  },
+  second: {
+    id: "e2e-second-course",
+    title: "E2E 公開講座2",
+    description: "E2E 公開講座2の説明",
+    status: "published",
+  },
+  draft: {
+    id: "e2e-draft-course",
+    title: "E2E 下書き講座",
+    description: "E2E 下書き講座の説明",
+    status: "draft",
+  },
+} as const;
+
 export const E2E_ENV = {
   TURSO_DATABASE_URL: "file:.test/e2e.db",
   TURSO_AUTH_TOKEN: "",

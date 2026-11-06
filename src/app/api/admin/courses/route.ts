@@ -1,4 +1,4 @@
-import { readJsonBody, withAdmin } from "@/lib/admin-route";
+import { readJsonBody, withAdmin } from "@/lib/api-route";
 import { createCourse, listCourses } from "@/services/course-service";
 
 export const GET = withAdmin(async () => {

@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { CourseSettings } from "@/components/admin/course-settings";
-import { CurriculumEditor } from "@/components/admin/curriculum-editor";
+import { CourseForm } from "@/components/admin/course-form";
+import { CourseStatusControl } from "@/components/admin/course-status-control";
+import { DeleteCourseButton } from "@/components/admin/delete-course-button";
 import { NotFoundError } from "@/lib/errors";
 import { requireAdmin } from "@/lib/session";
 import { getCourse } from "@/services/course-service";
-import { getCurriculum } from "@/services/curriculum-service";
 
 export const metadata: Metadata = {
-  title: "コースの編集",
+  title: "講座の編集",
   robots: { index: false, follow: false },
 };
 
@@ -18,7 +18,7 @@ export default function AdminCoursePage({
   params,
 }: PageProps<"/admin/courses/[courseId]">) {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-6">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-6">
       <Suspense fallback={<p>読み込み中...</p>}>
         <AdminCourseContent params={params} />
       </Suspense>
@@ -45,7 +45,6 @@ async function AdminCourseContent({
   await requireAdmin();
   const { courseId } = await params;
   const course = await loadCourse(courseId);
-  const sections = await getCurriculum(courseId);
 
   return (
     <>
@@ -54,12 +53,15 @@ async function AdminCourseContent({
           href="/admin"
           className="text-sm underline-offset-4 hover:underline"
         >
-          コース一覧へ戻る
+          講座一覧へ戻る
         </Link>
-        <h1 className="text-2xl font-semibold">コースの編集</h1>
+        <h1 className="text-2xl font-semibold">講座の編集</h1>
       </div>
-      <CourseSettings course={course} />
-      <CurriculumEditor courseId={course.id} sections={sections} />
+      <CourseStatusControl courseId={course.id} status={course.status} />
+      <CourseForm course={course} />
+      <div className="mt-2 border-t border-foreground/10 pt-4">
+        <DeleteCourseButton courseId={course.id} />
+      </div>
     </>
   );
 }

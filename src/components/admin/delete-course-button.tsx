@@ -1,39 +1,20 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
-import { useAdminAction } from "@/hooks/use-admin-action";
+import { useApiAction } from "@/hooks/use-api-action";
+import { apiFetch } from "@/lib/api-client";
 import {
   dangerButtonClass,
   errorTextClass,
   secondaryButtonClass,
 } from "./ui";
 
-type DeleteButtonProps = {
-  label: string;
-  confirmMessage: string;
-  onDelete: () => Promise<void>;
-  /** 削除後に別のページへ移動する場合は true。 */
-  navigatesAway?: boolean;
-};
-
 /** 確認ダイアログを挟んで削除する。元に戻せない操作なので、必ず確認する。 */
-export function DeleteButton({
-  label,
-  confirmMessage,
-  onDelete,
-  navigatesAway = false,
-}: DeleteButtonProps) {
+export function DeleteCourseButton({ courseId }: { courseId: string }) {
+  const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const { isPending, errorMessage, run } = useAdminAction();
-
-  async function handleConfirm() {
-    const succeeded = await run(onDelete, {
-      keepPendingOnSuccess: navigatesAway,
-    });
-    if (succeeded) {
-      dialogRef.current?.close();
-    }
-  }
+  const { isPending, errorMessage, run } = useApiAction();
 
   return (
     <>
@@ -42,13 +23,15 @@ export function DeleteButton({
         className={dangerButtonClass}
         onClick={() => dialogRef.current?.showModal()}
       >
-        {label}
+        削除
       </button>
       <dialog
         ref={dialogRef}
         className="m-auto w-full max-w-md rounded-lg bg-background p-6 text-foreground backdrop:bg-black/50"
       >
-        <p className="text-sm">{confirmMessage}</p>
+        <p className="text-sm">
+          この講座と、受講者の視聴記録を削除します。元に戻せません。
+        </p>
         {errorMessage && (
           <p role="alert" className={`mt-3 ${errorTextClass}`}>
             {errorMessage}
@@ -67,7 +50,17 @@ export function DeleteButton({
             type="button"
             className={dangerButtonClass}
             disabled={isPending}
-            onClick={handleConfirm}
+            onClick={() => {
+              void run(
+                async () => {
+                  await apiFetch(`/api/admin/courses/${courseId}`, "DELETE");
+                  dialogRef.current?.close();
+                  router.push("/admin");
+                  router.refresh();
+                },
+                { keepPendingOnSuccess: true },
+              );
+            }}
           >
             削除する
           </button>

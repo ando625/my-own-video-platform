@@ -2,17 +2,19 @@ import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { courses } from "@/db/schema";
-import { ConflictError, NotFoundError, ValidationError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 import { asRecord, parseTitle } from "@/lib/validation";
-import { countCourseLessons } from "./curriculum-service";
+import {
+  InvalidYoutubeUrlError,
+  parseYoutubeVideoId,
+} from "@/lib/youtube-url";
 
-const THUMBNAIL_PATH_PATTERN = /^\/thumbnails\/[A-Za-z0-9._-]+$/;
-const COURSE_NOT_FOUND = "コースが見つかりません。";
+const COURSE_NOT_FOUND = "講座が見つかりません。";
 
 type CourseFields = {
   title?: string;
   description?: string | null;
-  thumbnailPath?: string | null;
+  youtubeVideoId?: string;
 };
 
 function parseDescription(value: unknown): string | null {
@@ -25,23 +27,21 @@ function parseDescription(value: unknown): string | null {
   return value.trim() || null;
 }
 
-function parseThumbnailPath(value: unknown): string | null {
-  if (value === null || value === "") {
-    return null;
+function parseVideoId(value: unknown): string {
+  try {
+    if (typeof value !== "string") {
+      throw new InvalidYoutubeUrlError();
+    }
+    return parseYoutubeVideoId(value);
+  } catch (error) {
+    if (error instanceof InvalidYoutubeUrlError) {
+      throw new ValidationError(error.message);
+    }
+    throw error;
   }
-  if (
-    typeof value !== "string" ||
-    !THUMBNAIL_PATH_PATTERN.test(value) ||
-    value.includes("..")
-  ) {
-    throw new ValidationError(
-      "サムネイルは /thumbnails/ から始まる場所を入力してください。",
-    );
-  }
-  return value;
 }
 
-/** 修正できる項目だけを取り出す。status は公開の条件を通すため受け付けない。 */
+/** 修正できる項目だけを取り出す。status は専用の操作でだけ変更する。 */
 function parseCourseFields(record: Record<string, unknown>): CourseFields {
   const fields: CourseFields = {};
   if ("title" in record) {
@@ -50,8 +50,8 @@ function parseCourseFields(record: Record<string, unknown>): CourseFields {
   if ("description" in record) {
     fields.description = parseDescription(record.description);
   }
-  if ("thumbnailPath" in record) {
-    fields.thumbnailPath = parseThumbnailPath(record.thumbnailPath);
+  if ("youtubeUrl" in record) {
+    fields.youtubeVideoId = parseVideoId(record.youtubeUrl);
   }
   return fields;
 }
@@ -66,7 +66,7 @@ export async function getCourse(courseId: string) {
     .from(courses)
     .where(eq(courses.id, courseId));
   if (!course) {
-    throw new NotFoundError("コースが見つかりません。");
+    throw new NotFoundError(COURSE_NOT_FOUND);
   }
   return course;
 }
@@ -75,56 +75,13 @@ export async function createCourse(input: unknown) {
   const record = asRecord(input);
   const fields = parseCourseFields(record);
   const title = parseTitle(record.title);
+  const youtubeVideoId = parseVideoId(record.youtubeUrl);
 
   const [course] = await db
     .insert(courses)
-    .values({ ...fields, id: crypto.randomUUID(), title })
+    .values({ ...fields, id: crypto.randomUUID(), title, youtubeVideoId })
     .returning();
   return course;
-}
-
-export async function publishCourse(courseId: string) {
-  return db.transaction(async (tx) => {
-    const [course] = await tx
-      .select({ id: courses.id })
-      .from(courses)
-      .where(eq(courses.id, courseId));
-    if (!course) {
-      throw new NotFoundError(COURSE_NOT_FOUND);
-    }
-    if ((await countCourseLessons(tx, courseId)) === 0) {
-      throw new ConflictError("レッスンが1本以上あるコースだけを公開できます。");
-    }
-
-    const [published] = await tx
-      .update(courses)
-      .set({ status: "published" })
-      .where(eq(courses.id, courseId))
-      .returning();
-    return published;
-  });
-}
-
-export async function unpublishCourse(courseId: string) {
-  const [course] = await db
-    .update(courses)
-    .set({ status: "draft" })
-    .where(eq(courses.id, courseId))
-    .returning();
-  if (!course) {
-    throw new NotFoundError(COURSE_NOT_FOUND);
-  }
-  return course;
-}
-
-export async function deleteCourse(courseId: string) {
-  const [course] = await db
-    .delete(courses)
-    .where(eq(courses.id, courseId))
-    .returning({ id: courses.id });
-  if (!course) {
-    throw new NotFoundError(COURSE_NOT_FOUND);
-  }
 }
 
 export async function updateCourse(courseId: string, input: unknown) {
@@ -139,7 +96,37 @@ export async function updateCourse(courseId: string, input: unknown) {
     .where(eq(courses.id, courseId))
     .returning();
   if (!course) {
-    throw new NotFoundError("コースが見つかりません。");
+    throw new NotFoundError(COURSE_NOT_FOUND);
   }
   return course;
+}
+
+async function setCourseStatus(courseId: string, status: "draft" | "published") {
+  const [course] = await db
+    .update(courses)
+    .set({ status })
+    .where(eq(courses.id, courseId))
+    .returning();
+  if (!course) {
+    throw new NotFoundError(COURSE_NOT_FOUND);
+  }
+  return course;
+}
+
+export async function publishCourse(courseId: string) {
+  return setCourseStatus(courseId, "published");
+}
+
+export async function unpublishCourse(courseId: string) {
+  return setCourseStatus(courseId, "draft");
+}
+
+export async function deleteCourse(courseId: string) {
+  const [course] = await db
+    .delete(courses)
+    .where(eq(courses.id, courseId))
+    .returning({ id: courses.id });
+  if (!course) {
+    throw new NotFoundError(COURSE_NOT_FOUND);
+  }
 }

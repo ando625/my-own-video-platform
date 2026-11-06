@@ -1,4 +1,4 @@
-import { withAdmin } from "@/lib/admin-route";
+import { withAdmin } from "@/lib/api-route";
 import { unpublishCourse } from "@/services/course-service";
 
 type CourseRouteContext = {

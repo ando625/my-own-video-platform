@@ -14,7 +14,7 @@ export const courses = sqliteTable("courses", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  thumbnailPath: text("thumbnail_path"),
+  youtubeVideoId: text("youtube_video_id").notNull(),
   status: text("status", { enum: ["draft", "published"] })
     .default("draft")
     .notNull(),
@@ -27,46 +27,19 @@ export const courses = sqliteTable("courses", {
     .notNull(),
 });
 
-export const sections = sqliteTable(
-  "sections",
-  {
-    id: text("id").primaryKey(),
-    courseId: text("course_id")
-      .notNull()
-      .references(() => courses.id, { onDelete: "cascade" }),
-    title: text("title").notNull(),
-    position: integer("position").notNull(),
-  },
-  (table) => [index("sections_course_id_idx").on(table.courseId)],
-);
-
-export const lessons = sqliteTable(
-  "lessons",
-  {
-    id: text("id").primaryKey(),
-    sectionId: text("section_id")
-      .notNull()
-      .references(() => sections.id, { onDelete: "cascade" }),
-    title: text("title").notNull(),
-    youtubeVideoId: text("youtube_video_id").notNull(),
-    position: integer("position").notNull(),
-  },
-  (table) => [index("lessons_section_id_idx").on(table.sectionId)],
-);
-
-export const lessonProgress = sqliteTable(
-  "lesson_progress",
+export const courseProgress = sqliteTable(
+  "course_progress",
   {
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    lessonId: text("lesson_id")
+    courseId: text("course_id")
       .notNull()
-      .references(() => lessons.id, { onDelete: "cascade" }),
+      .references(() => courses.id, { onDelete: "cascade" }),
     completedAt: integer("completed_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.userId, table.lessonId] }),
-    index("lesson_progress_lesson_id_idx").on(table.lessonId),
+    primaryKey({ columns: [table.userId, table.courseId] }),
+    index("course_progress_course_id_idx").on(table.courseId),
   ],
 );

@@ -2,14 +2,9 @@ import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { session, user } from "../../src/db/auth-schema";
-import {
-  courses,
-  lessonProgress,
-  lessons,
-  sections,
-} from "../../src/db/course-schema";
+import { courseProgress, courses } from "../../src/db/course-schema";
 import { assertTestDatabase } from "../assert-test-database";
-import { E2E_ENV, E2E_USERS } from "./test-env";
+import { E2E_COURSES, E2E_ENV, E2E_USERS, E2E_VIDEO_ID } from "./test-env";
 
 export default async function globalSetup() {
   assertTestDatabase(E2E_ENV.TURSO_DATABASE_URL);
@@ -19,9 +14,7 @@ export default async function globalSetup() {
     const db = drizzle(client);
     await migrate(db, { migrationsFolder: "drizzle" });
 
-    await db.delete(lessonProgress);
-    await db.delete(lessons);
-    await db.delete(sections);
+    await db.delete(courseProgress);
     await db.delete(courses);
     await db.delete(session);
     await db.delete(user);
@@ -44,6 +37,13 @@ export default async function globalSetup() {
         expiresAt,
         createdAt: now,
         updatedAt: now,
+      });
+    }
+
+    for (const course of Object.values(E2E_COURSES)) {
+      await db.insert(courses).values({
+        ...course,
+        youtubeVideoId: E2E_VIDEO_ID,
       });
     }
   } finally {

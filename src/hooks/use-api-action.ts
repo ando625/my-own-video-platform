@@ -10,8 +10,8 @@ type RunOptions = {
   keepPendingOnSuccess?: boolean;
 };
 
-/** 管理画面の操作の、通信中の状態とエラー表示、成功後の再読み込みをまとめる。 */
-export function useAdminAction() {
+/** APIを呼ぶ操作の、通信中の状態とエラー表示、成功後の再読み込みをまとめる。 */
+export function useApiAction() {
   const router = useRouter();
   const inFlight = useRef(false);
   const [isPending, setIsPending] = useState(false);

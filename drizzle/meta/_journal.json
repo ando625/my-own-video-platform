@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793932601831,
+      "tag": "0000_clean_master_mold",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793937184715,
+      "tag": "0001_lonely_wolf_cub",
+      "breakpoints": true
+    }
+  ]
+}

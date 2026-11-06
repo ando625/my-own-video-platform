@@ -59,6 +59,26 @@ test("E2E-013: 下書きや存在しない講座は404になり、内容は見�
   }
 });
 
+test("E2E-043: 一般ユーザーの一覧でカードの画像を押すと動画の画面へ移動する", async ({
+  page,
+  context,
+}) => {
+  await signInAs(context, "member");
+  await page.goto("/");
+  const card = page
+    .getByRole("main")
+    .getByRole("listitem", { name: first.title });
+  await expect(card.locator("img")).toHaveAttribute(
+    "src",
+    new RegExp(`i\\.ytimg\\.com/vi/${E2E_VIDEO_ID}`),
+  );
+
+  await card.locator("img").click();
+
+  await expect(page).toHaveURL(new RegExp(`/courses/${first.id}$`));
+  await expect(page.getByRole("main").locator("iframe")).toBeVisible();
+});
+
 test("E2E-030: 管理画面で作成して公開すると、受講者の一覧に表示され視聴できる", async ({
   page,
   context,
@@ -67,17 +87,17 @@ test("E2E-030: 管理画面で作成して公開すると、受講者の一覧�
 }) => {
   const title = "E2E-030 公開する講座";
   await signInAs(context, "admin");
-  await page.goto("/admin");
+  await page.goto("/admin/courses/new");
   const main = page.getByRole("main");
   await main.getByLabel("タイトル").fill(title);
   await main.getByLabel("説明").fill("E2E-030の説明");
   await main.getByLabel("YouTubeのURL").fill(`https://youtu.be/${E2E_VIDEO_ID}`);
   await main.getByRole("button", { name: "保存" }).click();
-  await expect(page).toHaveURL(/\/admin\/courses\/[\w-]+$/);
-  await page.getByRole("main").getByRole("button", { name: "公開する" }).click();
+  await expect(page).toHaveURL(/\/admin\/courses\/[\w-]{36}$/);
+  await page.getByRole("main").getByRole("radio", { name: "公開中" }).click();
   await expect(
-    page.getByRole("main").getByText("公開中", { exact: true }),
-  ).toBeVisible();
+    page.getByRole("main").getByRole("radio", { name: "公開中" }),
+  ).toBeChecked();
 
   const learner = await browser.newContext({ baseURL });
   await signInAs(learner, "member");

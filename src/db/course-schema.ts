@@ -15,6 +15,7 @@ export const courses = sqliteTable("courses", {
   title: text("title").notNull(),
   description: text("description"),
   youtubeVideoId: text("youtube_video_id").notNull(),
+  thumbnailFileName: text("thumbnail_file_name"),
   status: text("status", { enum: ["draft", "published"] })
     .default("draft")
     .notNull(),

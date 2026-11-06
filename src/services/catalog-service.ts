@@ -9,7 +9,8 @@ export async function listPublishedCourses() {
     .select({
       id: courses.id,
       title: courses.title,
-      description: courses.description,
+      thumbnailFileName: courses.thumbnailFileName,
+      youtubeVideoId: courses.youtubeVideoId,
     })
     .from(courses)
     .where(eq(courses.status, "published"))

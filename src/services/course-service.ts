@@ -2,6 +2,7 @@ import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { courses } from "@/db/schema";
+import { isValidThumbnailFileName } from "@/lib/course-thumbnail";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { asRecord, parseTitle } from "@/lib/validation";
 import {
@@ -15,6 +16,7 @@ type CourseFields = {
   title?: string;
   description?: string | null;
   youtubeVideoId?: string;
+  thumbnailFileName?: string | null;
 };
 
 function parseDescription(value: unknown): string | null {
@@ -25,6 +27,18 @@ function parseDescription(value: unknown): string | null {
     throw new ValidationError("説明の形式が正しくありません。");
   }
   return value.trim() || null;
+}
+
+function parseThumbnailFileName(value: unknown): string | null {
+  if (value === null || value === "") {
+    return null;
+  }
+  if (typeof value !== "string" || !isValidThumbnailFileName(value)) {
+    throw new ValidationError(
+      "サムネイルのファイル名は、英数字と . _ - で入力してください（png、jpg、jpeg、webp）。",
+    );
+  }
+  return value;
 }
 
 function parseVideoId(value: unknown): string {
@@ -52,6 +66,9 @@ function parseCourseFields(record: Record<string, unknown>): CourseFields {
   }
   if ("youtubeUrl" in record) {
     fields.youtubeVideoId = parseVideoId(record.youtubeUrl);
+  }
+  if ("thumbnailFileName" in record) {
+    fields.thumbnailFileName = parseThumbnailFileName(record.thumbnailFileName);
   }
   return fields;
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { CourseForm } from "@/components/admin/course-form";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { CourseCard, CourseCardGrid } from "@/components/course/course-card";
 import { requireAdmin } from "@/lib/session";
 import { listCourses } from "@/services/course-service";
 
@@ -12,11 +12,9 @@ export const metadata: Metadata = {
 
 export default function AdminPage() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-6">
-      <Suspense fallback={<p>読み込み中...</p>}>
-        <AdminContent />
-      </Suspense>
-    </main>
+    <Suspense fallback={<main className="p-6">読み込み中...</main>}>
+      <AdminContent />
+    </Suspense>
   );
 }
 
@@ -25,34 +23,24 @@ async function AdminContent() {
   const courses = await listCourses();
 
   return (
-    <>
+    <AdminShell>
       <h1 className="text-2xl font-semibold">管理画面</h1>
-      <CourseForm />
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">講座一覧</h2>
-        {courses.length === 0 ? (
-          <p className="text-sm text-foreground/60">講座はまだありません。</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {courses.map((course) => (
-              <li
-                key={course.id}
-                className="flex items-center justify-between gap-3 rounded-md border border-foreground/10 p-3"
-              >
-                <Link
-                  href={`/admin/courses/${course.id}`}
-                  className="underline-offset-4 hover:underline"
-                >
-                  {course.title}
-                </Link>
-                <span className="text-sm text-foreground/60">
-                  {course.status === "published" ? "公開中" : "下書き"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </>
+      <h2 className="text-lg font-semibold">講座一覧</h2>
+      {courses.length === 0 ? (
+        <p className="text-sm text-foreground/60">講座はまだありません。</p>
+      ) : (
+        <CourseCardGrid>
+          {courses.map((course) => (
+            <CourseCard
+              key={course.id}
+              href={`/admin/courses/${course.id}`}
+              ariaLabel={course.title}
+              course={course}
+              footer={course.status === "published" ? "公開中" : "下書き"}
+            />
+          ))}
+        </CourseCardGrid>
+      )}
+    </AdminShell>
   );
 }

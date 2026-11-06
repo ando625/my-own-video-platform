@@ -31,6 +31,23 @@ test("E2E-052: 未ログインのウェルカムページには上部の帯と�
   await expect(page.getByRole("link", { name: "ログイン" })).toHaveCount(0);
 });
 
+test("E2E-053: ログアウトすると /login へ移動し、ログインが必要な画面に入れない", async ({
+  page,
+  context,
+}) => {
+  await signInAs(context, "logout");
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "ログアウト" }).click();
+
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.locator("header")).toHaveCount(0);
+  for (const path of ["/", "/admin"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/login$/);
+  }
+});
+
 test("E2E-051: ログイン済みで /login を開くと / へ移動する", async ({
   page,
   context,

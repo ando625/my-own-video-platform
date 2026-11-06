@@ -16,6 +16,13 @@ export const E2E_USERS = {
     email: "member@example.com",
     sessionToken: "e2e-member-session-token",
   },
+  // ログアウトのテストでログイン状態が消えるので、専用のユーザーにする。
+  logout: {
+    id: "e2e-logout",
+    name: "E2E Logout",
+    email: "logout@example.com",
+    sessionToken: "e2e-logout-session-token",
+  },
 } as const;
 
 export const E2E_VIDEO_ID = "dQw4w9WgXcQ";

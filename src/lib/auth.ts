@@ -20,6 +20,8 @@ export const auth = betterAuth({
     google: {
       clientId: requireEnv("GOOGLE_CLIENT_ID"),
       clientSecret: requireEnv("GOOGLE_CLIENT_SECRET"),
+      // ログアウト後に同じアカウントで自動的に入らず、毎回アカウントを選べるようにする。
+      prompt: "select_account",
     },
   },
   // Server Action からログイン状態の Cookie を設定できるようにする。常に最後に置く。
